@@ -41,6 +41,7 @@ class Merb::Cache
     @config = DEFAULT_CONFIG.merge(Merb::Plugins.config[:merb_cache] || {})
     if @config[:disable] == true || Merb.environment == @config[:disable]
       config[:store] = "dummy"
+      config[:disable_page_caching] = true
     end
     @config[:cache_html_directory] ||= Merb.dir_for(:public) / "cache"
     require "merb-cache/cache-store/#{@config[:store]}"

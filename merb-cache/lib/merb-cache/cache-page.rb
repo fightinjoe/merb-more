@@ -64,8 +64,14 @@ module Merb::Cache::ControllerInstanceMethods
   # ==== Parameter
   # options<String,Hash>:: The options that will be passed to #expire_key_for
   #
-  # ==== Examples
+  # ==== Examples (See Merb::Cache#expire_key_for for more options)
+  #   # will expire path/to/page/cache/news/show/1.html
+  #   expire_page(:key => url(:news,News.find(1)))
+  #
+  #   # will expire path/to/page/cache/news/show.html
   #   expire_page(:action => 'show', :controller => 'news')
+  #
+  #   # will expire path/to/page/cache/news/show*
   #   expire_page(:action => 'show', :match => true)
   def expire_page(options)
     config_dir = Merb::Controller._cache.config[:cache_html_directory]
@@ -75,6 +81,7 @@ module Merb::Cache::ControllerInstanceMethods
       else
         files = config_dir / "#{key}.html"
       end
+      Merb.logger.info("cache: expiring pages matching #{files}")
       FileUtils.rm_rf(files)
     end
     true
@@ -109,6 +116,12 @@ module Merb::Cache::ControllerInstanceMethods
     path = "index" if path.empty?
     cache_file = Merb::Controller._cache.config[:cache_html_directory] / "#{path}.html"
     if data
+      # If caching is disabled, don't save the cached page, but do return
+      # the page if previously cached.
+      if Merb::Controller._cache.config[:disable_page_caching]
+        Merb.logger.info("cache: deactivated (#{path})")
+        return true
+      end
       cache_directory = File.dirname(cache_file)
       FileUtils.mkdir_p(cache_directory)
       _expire_in = pages[action][0]
