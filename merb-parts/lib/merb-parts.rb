@@ -18,7 +18,7 @@ module Merb
     #    part TodoPart => :list
     #   }}}
     #
-    #  Calling a part with additional options
+    #  Calling a part with additional options, which are placed in the params hash
     #  {{{
     #    part TodoPart => :list, :limit => 20, :user => current_user 
     #  }}}
